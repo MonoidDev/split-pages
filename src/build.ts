@@ -21,7 +21,7 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
     const url = `/${path.relative(options.pageRoot, source).replace(ext, '')}`;
     const importName = `${url.replace(/[/.]/g, '_')}`;
 
-    if (/\.pagemeta\.tsx$/.test(source)) {
+    if (/\.pagemeta\.tsx?$/.test(source)) {
       if (/index\.pagemeta\.tsx?$/.test(path.basename(source))) {
         const page: Page = {
           source,
