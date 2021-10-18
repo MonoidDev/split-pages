@@ -1,6 +1,6 @@
 {
   "name": "@monoid-dev/split-pages",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "description": "Generate routing with code-splitting",
   "author": "Chenyu Wang <cwang592@usc.edu>",
@@ -27,7 +27,8 @@
     "docs": "typedoc --entryPoints src/main.ts",
     "build": "tsc -p tsconfig.json",
     "build-all": "yarn clean && yarn build && yarn esbuild-node",
-    "esbuild-node": "node esbuild.js"
+    "esbuild-node": "node esbuild.js",
+    "prepare": "yarn build-all"
   },
   "devDependencies": {
     "@types/jest": "^26.0.21",
