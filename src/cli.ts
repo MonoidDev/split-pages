@@ -12,7 +12,11 @@ interface Argv {
 }
 
 const main = () => {
-  yargs(hideBin(process.argv))
+  const argv = process.argv[0] === 'split-pages'
+    ? ['node', ...process.argv]
+    : process.argv;
+
+  yargs(hideBin(argv))
     .command(
       'build [config]',
       'build the pages. ',
