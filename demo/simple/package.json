@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "scripts": {
+    "ts": "esmo",
+    "postinstall": "ln -sf ../../../../dist/cjs/cli.cjs node_modules/.bin/split-pages"
+  },
+  "dependencies": {
+    "split-pages": "link:../../"
+  },
+  "devDependencies": {
+    "esmo": "^0.10.1"
+  }
+}

@@ -52,14 +52,13 @@ export const generateIndex = async (
   lines.push(`
     return (
       <Switch>
-        ${options.redirections ? Object.entries(options.redirections).map(([path, target]) => `
+        ${options.redirections ? Object.entries(options.redirections).map(([p, target]) => `
           <Route
-            path=${JSON.stringify(path)}
+            path=${JSON.stringify(p)}
             exact
           >
             <Redirect to=${JSON.stringify(target)} />
-          </Route>`
-        ) : ''}
+          </Route>`) : ''}
 
         ${[...chunks].sort((a, b) => b.prefix.length - a.prefix.length).map(getChunkCode).join('\n')}
 

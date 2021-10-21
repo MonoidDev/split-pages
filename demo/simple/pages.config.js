@@ -1,7 +1,7 @@
 /**
  * @type {import('../../').SplitPagesInputOptions}
  */
-module.exports = {
+export default {
   pageRoot: './pages',
   redirections: {
     '/xxx': '/'

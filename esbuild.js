@@ -1,13 +1,29 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const pkg = require('./package.json');
+import { build } from 'esbuild';
+import { nodeExternalsPlugin } from 'esbuild-node-externals';
 
-const esbuild = require('esbuild');
-const { nodeExternalsPlugin } = require('esbuild-node-externals');
-
-esbuild.build({
-  entryPoints: ['src/cli.ts'],
+[
+  {
+    outdir: 'dist/esm',
+    format: 'esm',
+    outExtension: {
+      '.js': '.mjs',
+    },
+  },
+  {
+    outdir: 'dist/cjs',
+    format: 'cjs',
+    outExtension: {
+      '.js': '.cjs',
+    },
+  },
+].map((opts) => build({
+  entryPoints: [
+    'src/cli.ts',
+    'src/index.ts',
+  ],
   bundle: true,
   platform: 'node',
-  outfile: pkg.bin['split-pages'],
   plugins: [nodeExternalsPlugin()],
-});
+  ...opts,
+}));
+

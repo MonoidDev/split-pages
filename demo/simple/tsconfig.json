@@ -1,0 +1,6 @@
+{
+  "include": [
+    "pages/**/*"
+  ],
+  "extends": "../../tsconfig.json"
+}

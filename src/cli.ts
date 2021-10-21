@@ -1,22 +1,23 @@
 #!/usr/bin/env node
-import { build } from './build';
+import path from 'path';
+
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { SplitPagesInputOptions } from '.';
-import { SplitPagesOptions } from './types';
 
-import path from 'path';
+import { SplitPagesInputOptions } from '.';
+import { build } from './build';
+import { SplitPagesOptions } from './types';
 
 interface Argv {
   config: string;
 }
 
 const main = () => {
-  const argv = process.argv[0] === 'split-pages'
+  const finalArgv = process.argv[0] === 'split-pages'
     ? ['node', ...process.argv]
     : process.argv;
 
-  yargs(hideBin(argv))
+  yargs(hideBin(finalArgv))
     .command(
       'build [config]',
       'build the pages. ',
@@ -34,8 +35,18 @@ const main = () => {
           config: configPath,
         } = argv;
 
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const inputOptions: SplitPagesInputOptions = require(path.resolve(process.cwd(), configPath));
+        let inputOptions: SplitPagesInputOptions;
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line import/no-dynamic-require
+          inputOptions = require(path.resolve(process.cwd(), configPath));
+        } catch (e) {
+          if ((e as any).code === 'ERR_REQUIRE_ESM') {
+            inputOptions = (await import(path.resolve(process.cwd(), configPath))).default;
+          } else {
+            throw e;
+          }
+        }
 
         const options: SplitPagesOptions = {
           chunkPrefixes: [],
@@ -44,12 +55,11 @@ const main = () => {
         };
 
         await build(options);
-      }
+      },
     )
     .help()
-    .demand(1, "Must provide a valid command")
+    .demand(1, 'Must provide a valid command')
     .parse();
-
 };
 
 main();
