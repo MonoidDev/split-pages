@@ -1,6 +1,6 @@
 {
   "name": "@monoid-dev/split-pages",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": false,
   "description": "Generate routing with code-splitting",
   "author": "Chenyu Wang <cwang592@usc.edu>",
@@ -18,7 +18,7 @@
     "import": "./dist/esm/index.mjs"
   },
   "bin": {
-    "your-cli-name": "./dist/cjs/cli.cjs"
+    "split-pages": "./dist/cjs/cli.cjs"
   },
   "scripts": {
     "cli": "yarn ts src/cli.ts",
