@@ -249,7 +249,7 @@ var build = async (options) => {
   });
   try {
     await fs4.access(options.outDir);
-    await fs4.rmdir(options.outDir, {
+    await fs4.rm(options.outDir, {
       recursive: true
     });
   } catch (_e) {

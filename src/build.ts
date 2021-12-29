@@ -70,7 +70,7 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
 
   try {
     await fs.access(options.outDir);
-    await fs.rmdir(options.outDir, {
+    await fs.rm(options.outDir, {
       recursive: true,
     });
   } catch (_e) {

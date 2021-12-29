@@ -262,7 +262,7 @@ var build = async (options) => {
   });
   try {
     await import_promises4.default.access(options.outDir);
-    await import_promises4.default.rmdir(options.outDir, {
+    await import_promises4.default.rm(options.outDir, {
       recursive: true
     });
   } catch (_e) {
