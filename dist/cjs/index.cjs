@@ -256,7 +256,7 @@ var build = async (options) => {
           prefix,
           path: import_path5.default.join(options.outDir, `${filename}.tsx`),
           pages: [],
-          importName: `Chunk_${filename.replace("/", "_")}`,
+          importName: `Chunk_${filename.replace(/\//g, "_")}`,
           isLazy: prefix !== "/"
         });
       }

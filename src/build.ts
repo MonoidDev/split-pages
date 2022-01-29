@@ -57,7 +57,7 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
           prefix,
           path: path.join(options.outDir, `${filename}.tsx`),
           pages: [],
-          importName: `Chunk_${filename.replace('/', '_')}`,
+          importName: `Chunk_${filename.replace(/\//g, '_')}`,
           isLazy: prefix !== '/',
         });
       }
