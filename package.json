@@ -39,7 +39,7 @@
     "preinstall": "only-allow pnpm",
     "cli": "yarn ts src/cli.ts",
     "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
-    "test": "jest",
+    "test": "echo 'no test'",
     "clean": "rm -rf dist",
     "ts": "yarn node -r esbuild-register",
     "build": "yarn clean && yarn esbuild",
