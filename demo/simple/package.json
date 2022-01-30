@@ -1,7 +1,7 @@
 {
   "scripts": {
     "ts": "pnpm run node -r esbuild-register",
-    "dev": "vite dev",
+    "dev": "split-pages build && vite dev",
     "postinstall": "ln -sf ../../../../dist/cjs/cli.cjs node_modules/.bin/split-pages"
   },
   "dependencies": {

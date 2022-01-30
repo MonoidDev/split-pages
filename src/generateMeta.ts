@@ -24,7 +24,7 @@ export const generateMeta = async (
     );
   }
 
-  lines.push('export type PageInput = {');
+  lines.push('export type PageProps = {');
 
   for (const page of pages) {
     lines.push(`
@@ -34,10 +34,10 @@ export const generateMeta = async (
 
   lines.push('};');
 
-  lines.push('export type AppUrl = keyof PageInput;');
+  lines.push('export type AppUrl = keyof PageProps;');
 
   lines.push(`
-    export function url<U extends AppUrl>(pathname: U, props: PageInput[U]) {
+    export function url<U extends AppUrl>(pathname: U, props: PageProps[U]) {
       return createUrl(pathname, props);
     }
   `);
