@@ -1,18 +1,18 @@
-import { parse } from 'querystring';
+import { parse, stringify } from 'querystring';
 
 import React from 'react';
 
-import type { AnyResolver, OutputOf } from '@monoid-dev/reform';
+import type { AnyResolver, UnknownResolver, OutputOf } from '@monoid-dev/reform';
 import { useLocation } from 'react-router-dom';
 
 import { InvalidSearch } from './errors';
 import { ClientPageConfig } from './types';
 
-export const definePage = <R extends AnyResolver = AnyResolver>(
+export const definePage = <R extends AnyResolver = UnknownResolver>(
   config: ClientPageConfig<R>,
   ClientPage: React.VFC<OutputOf<R>>,
-) => {
-  const Page: React.VFC = () => {
+): React.VFC & { __R: R } => {
+  const Page = () => {
     const location = useLocation();
 
     const param = parse(location.search.slice(1)); // Removing the '?'
@@ -29,5 +29,9 @@ export const definePage = <R extends AnyResolver = AnyResolver>(
     return React.createElement(ClientPage);
   };
 
-  return Page;
+  return Page as any;
+};
+
+export const createUrl = (url: string, props: any) => {
+  return `${url}?${stringify(props)}`;
 };

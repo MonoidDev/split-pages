@@ -6,7 +6,7 @@ specifiers:
   '@babel/preset-react': ^7.16.7
   '@babel/preset-typescript': ^7.16.7
   '@microsoft/tsdoc': ^0.13.2
-  '@monoid-dev/reform': ^1.0.0-alpha.1
+  '@monoid-dev/reform': ^1.0.0-alpha.5
   '@monoid/utils.eslint.config': ^0.0.3
   '@monoid/utils.prettier.config': 0.0.2
   '@types/jest': ^26.0.21
@@ -37,7 +37,7 @@ dependencies:
   '@babel/core': 7.16.12
   '@babel/preset-react': 7.16.7_@babel+core@7.16.12
   '@microsoft/tsdoc': 0.13.2
-  '@monoid-dev/reform': 1.0.0-alpha.1_react-dom@17.0.2+react@17.0.2
+  '@monoid-dev/reform': 1.0.0-alpha.5_react-dom@17.0.2+react@17.0.2
   '@types/react-router-dom': 5.3.3
   prettier: 2.5.1
   querystring: 0.2.1
@@ -1626,8 +1626,8 @@ packages:
     resolution: {integrity: sha512-WrHvO8PDL8wd8T2+zBGKrMwVL5IyzR3ryWUsl0PXgEV0QHup4mTLi0QcATefGI6Gx9Anu7vthPyyyLpY0EpiQg==}
     dev: false
 
-  /@monoid-dev/reform/1.0.0-alpha.1_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-ag16kbGoe4Fla2rSPYa93qhPOlWH6QRhxKUVygFJxXl3OyNoGlhK4VqKL7LR7L/oVMMELAmiD7O5x1Wwp54kiA==}
+  /@monoid-dev/reform/1.0.0-alpha.5_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-dFQ/6APwWy7sqH1Y2ZkjAw/PJOPlu6uNjEFdjrqBlI+t9AR+xaPqQZSalM3qi+n+3EgC+GpuaR0zmyd/MFpksg==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^17.0.2

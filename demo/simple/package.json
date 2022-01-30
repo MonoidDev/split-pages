@@ -5,7 +5,7 @@
     "postinstall": "ln -sf ../../../../dist/cjs/cli.cjs node_modules/.bin/split-pages"
   },
   "dependencies": {
-    "split-pages": "link:../../",
+    "@monoid-dev/split-pages": "link:../../",
     "vite": "^2.7.13"
   },
   "devDependencies": {

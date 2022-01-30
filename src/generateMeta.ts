@@ -1,4 +1,3 @@
-import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -12,61 +11,42 @@ export const generateMeta = async (
 ): Promise<void> => {
   const lines: string[] = [];
 
-  const importNames = new Set<string>();
+  lines.push(`import { OutputOf } from '@monoid-dev/reform';`);
+  lines.push(`import { createUrl } from '@monoid-dev/split-pages/client';`);
 
-  pages.forEach((p) => {
-    if (!existsSync(p.source.replace(/\.tsx$/, '.pagemeta.ts'))) {
-      return;
-    }
+  for (const page of pages) {
+    const importPath = relativeImport(metaPath, page.source);
 
-    const importPath = relativeImport(metaPath, p.source.replace('.tsx', '.pagemeta.tsx'));
+    lines.push(
+      `import type { ${page.componentName} as ${page.importName} } from ${JSON.stringify(
+        importPath,
+      )}`,
+    );
+  }
 
-    lines.push(`import { meta as ${p.importName} } from ${JSON.stringify(importPath)};`);
+  lines.push('export type PageInput = {');
 
-    importNames.add(p.importName);
-  });
-
-  lines.push('export const meta = [');
-
-  pages.forEach((p) => {
-    let meta: string;
-
-    if (importNames.has(p.importName)) {
-      meta = `...${p.importName}`;
-    } else {
-      meta = '';
-    }
-
+  for (const page of pages) {
     lines.push(`
-      {
-        url: '${p.url}',
-        name: '${p.componentName}',
-        isDirectory: ${p.isDirectory},
-        listed: true,
-        staffOnly: false,
-        superuserOnly: false,
-        ${meta}
-      },
+      ${JSON.stringify(page.url)}: OutputOf<(typeof ${page.importName})['__R']>; 
     `);
-  });
+  }
 
-  lines.push('];');
+  lines.push('};');
 
-  lines.push('export type AppUrl =');
+  lines.push('export type AppUrl = keyof PageInput;');
 
-  pages.forEach((p) => {
-    lines.push(`| ${JSON.stringify(p.url)}`);
-  });
-
-  lines.push(';');
-
-  lines.push('export const url = (u: AppUrl) => u;');
-
-  const code = lines.join('\n');
+  lines.push(`
+    export function url<U extends AppUrl>(pathname: U, props: PageInput[U]) {
+      return createUrl(pathname, props);
+    }
+  `);
 
   await fs.mkdir(path.dirname(metaPath), {
     recursive: true,
   });
+
+  const code = lines.join('\n');
 
   await fs.writeFile(metaPath, formatCode(code));
 };

@@ -15,7 +15,10 @@
   "typesVersions": {
     ">=4.2": {
       "*": [
-        "./src/*"
+        "./src/index.ts"
+      ],
+      "client": [
+        "./src/client.ts"
       ]
     }
   },
@@ -71,7 +74,7 @@
     "@babel/core": "^7.16.12",
     "@babel/preset-react": "^7.16.7",
     "@microsoft/tsdoc": "^0.13.2",
-    "@monoid-dev/reform": "^1.0.0-alpha.1",
+    "@monoid-dev/reform": "^1.0.0-alpha.5",
     "@types/react-router-dom": "5",
     "prettier": "^2.4.1",
     "querystring": "^0.2.1",

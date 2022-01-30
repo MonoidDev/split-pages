@@ -32,7 +32,7 @@ import path2 from "path";
 import path from "path";
 import prettier from "prettier";
 var formatCode = (code) => {
-  return prettier.format(code, { parser: "babel" });
+  return prettier.format(code, { parser: "babel-ts" });
 };
 var relativeImport = (importer, target) => {
   let importPath = path.relative(path.dirname(importer), target).replace(/\.tsx?/, "");
@@ -159,51 +159,33 @@ var generateIndex = (options, indexPath, chunks) => __async(void 0, null, functi
 });
 
 // src/generateMeta.ts
-import { existsSync } from "fs";
 import fs3 from "fs/promises";
 import path4 from "path";
 var generateMeta = (_options, metaPath, pages) => __async(void 0, null, function* () {
   const lines = [];
-  const importNames = /* @__PURE__ */ new Set();
-  pages.forEach((p) => {
-    if (!existsSync(p.source.replace(/\.tsx$/, ".pagemeta.ts"))) {
-      return;
-    }
-    const importPath = relativeImport(metaPath, p.source.replace(".tsx", ".pagemeta.tsx"));
-    lines.push(`import { meta as ${p.importName} } from ${JSON.stringify(importPath)};`);
-    importNames.add(p.importName);
-  });
-  lines.push("export const meta = [");
-  pages.forEach((p) => {
-    let meta;
-    if (importNames.has(p.importName)) {
-      meta = `...${p.importName}`;
-    } else {
-      meta = "";
-    }
+  lines.push(`import { OutputOf } from '@monoid-dev/reform';`);
+  lines.push(`import { createUrl } from '@monoid-dev/split-pages/client';`);
+  for (const page of pages) {
+    const importPath = relativeImport(metaPath, page.source);
+    lines.push(`import type { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)}`);
+  }
+  lines.push("export type PageInput = {");
+  for (const page of pages) {
     lines.push(`
-      {
-        url: '${p.url}',
-        name: '${p.componentName}',
-        isDirectory: ${p.isDirectory},
-        listed: true,
-        staffOnly: false,
-        superuserOnly: false,
-        ${meta}
-      },
+      ${JSON.stringify(page.url)}: OutputOf<(typeof ${page.importName})['__R']>; 
     `);
-  });
-  lines.push("];");
-  lines.push("export type AppUrl =");
-  pages.forEach((p) => {
-    lines.push(`| ${JSON.stringify(p.url)}`);
-  });
-  lines.push(";");
-  lines.push("export const url = (u: AppUrl) => u;");
-  const code = lines.join("\n");
+  }
+  lines.push("};");
+  lines.push("export type AppUrl = keyof PageInput;");
+  lines.push(`
+    export function url<U extends AppUrl>(pathname: U, props: PageInput[U]) {
+      return createUrl(pathname, props);
+    }
+  `);
   yield fs3.mkdir(path4.dirname(metaPath), {
     recursive: true
   });
+  const code = lines.join("\n");
   yield fs3.writeFile(metaPath, formatCode(code));
 });
 

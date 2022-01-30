@@ -29,10 +29,11 @@ var __toCommonJS = /* @__PURE__ */ ((cache) => {
 // src/client.ts
 var client_exports = {};
 __export(client_exports, {
+  createUrl: () => createUrl,
   definePage: () => definePage
 });
 
-// src/definePage.ts
+// src/clientPage.ts
 var import_querystring = require("querystring");
 var import_react = __toESM(require("react"));
 var import_react_router_dom = require("react-router-dom");
@@ -45,7 +46,7 @@ var InvalidSearch = class extends Error {
   }
 };
 
-// src/definePage.ts
+// src/clientPage.ts
 var definePage = (config, ClientPage) => {
   const Page = () => {
     const location = (0, import_react_router_dom.useLocation)();
@@ -61,8 +62,12 @@ var definePage = (config, ClientPage) => {
   };
   return Page;
 };
+var createUrl = (url, props) => {
+  return `${url}?${(0, import_querystring.stringify)(props)}`;
+};
 module.exports = __toCommonJS(client_exports);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  createUrl,
   definePage
 });

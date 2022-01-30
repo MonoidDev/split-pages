@@ -1,5 +1,5 @@
-// src/definePage.ts
-import { parse } from "querystring";
+// src/clientPage.ts
+import { parse, stringify } from "querystring";
 import React from "react";
 import { useLocation } from "react-router-dom";
 
@@ -11,7 +11,7 @@ var InvalidSearch = class extends Error {
   }
 };
 
-// src/definePage.ts
+// src/clientPage.ts
 var definePage = (config, ClientPage) => {
   const Page = () => {
     const location = useLocation();
@@ -27,6 +27,10 @@ var definePage = (config, ClientPage) => {
   };
   return Page;
 };
+var createUrl = (url, props) => {
+  return `${url}?${stringify(props)}`;
+};
 export {
+  createUrl,
   definePage
 };
