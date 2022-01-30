@@ -1,3 +1,5 @@
+import { AnyResolver } from '@monoid-dev/reform';
+
 export interface SplitPagesInputOptions {
   pageRoot: string;
   chunkPrefixes?: string[];
@@ -26,4 +28,15 @@ export interface Chunk {
   pages: Page[];
   importName: string;
   isLazy: boolean;
+}
+
+export interface ExtractMetaResult {
+  searchType: string;
+}
+
+export interface PageMeta {}
+
+export interface ClientPageConfig<R extends AnyResolver = AnyResolver> {
+  meta?: PageMeta;
+  props?: R;
 }

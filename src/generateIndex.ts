@@ -43,7 +43,9 @@ export const generateIndex = async (
     if (chunk.isLazy) {
       const importPath = relativeImport(indexPath, chunk.path);
 
-      lines.push(`const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(importPath)}))`);
+      lines.push(
+        `const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(importPath)}))`,
+      );
     }
   }
 
@@ -52,15 +54,24 @@ export const generateIndex = async (
   lines.push(`
     return (
       <Switch>
-        ${options.redirections ? Object.entries(options.redirections).map(([p, target]) => `
+        ${
+          options.redirections
+            ? Object.entries(options.redirections).map(
+                ([p, target]) => `
           <Route
             path=${JSON.stringify(p)}
             exact
           >
             <Redirect to=${JSON.stringify(target)} />
-          </Route>`) : ''}
+          </Route>`,
+              )
+            : ''
+        }
 
-        ${[...chunks].sort((a, b) => b.prefix.length - a.prefix.length).map(getChunkCode).join('\n')}
+        ${[...chunks]
+          .sort((a, b) => b.prefix.length - a.prefix.length)
+          .map(getChunkCode)
+          .join('\n')}
 
         <Route
           path="*"

@@ -4,10 +4,7 @@ import path from 'path';
 import type { Chunk, Page, SplitPagesOptions } from './types';
 import { formatCode, relativeImport } from './utils';
 
-export const generateChunk = async (
-  options: SplitPagesOptions,
-  chunk: Chunk,
-): Promise<void> => {
+export const generateChunk = async (options: SplitPagesOptions, chunk: Chunk): Promise<void> => {
   const lines: string[] = [];
 
   const noMatchPath = relativeImport(chunk.path, `${options.pageRoot}/NoMatch`);
@@ -23,7 +20,9 @@ export const generateChunk = async (
 
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
-    lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
+    lines.push(
+      `import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`,
+    );
   }
 
   const getRouteCode = (page: Page) => {

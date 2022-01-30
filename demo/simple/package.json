@@ -1,13 +1,14 @@
 {
-  "type": "module",
   "scripts": {
-    "ts": "esmo",
+    "ts": "pnpm run node -r esbuild-register",
+    "dev": "vite dev",
     "postinstall": "ln -sf ../../../../dist/cjs/cli.cjs node_modules/.bin/split-pages"
   },
   "dependencies": {
-    "split-pages": "link:../../"
+    "split-pages": "link:../../",
+    "vite": "^2.7.13"
   },
   "devDependencies": {
-    "esmo": "^0.10.1"
+    "@vitejs/plugin-react": "^1.1.4"
   }
 }

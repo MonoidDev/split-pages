@@ -21,9 +21,7 @@ export const generateMeta = async (
 
     const importPath = relativeImport(metaPath, p.source.replace('.tsx', '.pagemeta.tsx'));
 
-    lines.push(
-      `import { meta as ${p.importName} } from ${JSON.stringify(importPath)};`,
-    );
+    lines.push(`import { meta as ${p.importName} } from ${JSON.stringify(importPath)};`);
 
     importNames.add(p.importName);
   });

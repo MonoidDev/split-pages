@@ -1,3 +1,24 @@
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
+
 // src/build.ts
 import fs4 from "fs/promises";
 import path5 from "path";
@@ -11,7 +32,7 @@ import path2 from "path";
 import path from "path";
 import prettier from "prettier";
 var formatCode = (code) => {
-  return prettier.format(code, {parser: "babel"});
+  return prettier.format(code, { parser: "babel" });
 };
 var relativeImport = (importer, target) => {
   let importPath = path.relative(path.dirname(importer), target).replace(/\.tsx?/, "");
@@ -22,7 +43,7 @@ var relativeImport = (importer, target) => {
 };
 
 // src/generateChunk.ts
-var generateChunk = async (options, chunk) => {
+var generateChunk = (options, chunk) => __async(void 0, null, function* () {
   const lines = [];
   const noMatchPath = relativeImport(chunk.path, `${options.pageRoot}/NoMatch`);
   lines.push(`
@@ -67,16 +88,16 @@ var generateChunk = async (options, chunk) => {
     }
   `);
   const code = lines.join("\n");
-  await fs.mkdir(path2.dirname(chunk.path), {
+  yield fs.mkdir(path2.dirname(chunk.path), {
     recursive: true
   });
-  await fs.writeFile(chunk.path, formatCode(code));
-};
+  yield fs.writeFile(chunk.path, formatCode(code));
+});
 
 // src/generateIndex.ts
 import fs2 from "fs/promises";
 import path3 from "path";
-var generateIndex = async (options, indexPath, chunks) => {
+var generateIndex = (options, indexPath, chunks) => __async(void 0, null, function* () {
   const getChunkCode = (page) => {
     return `
       <Route path="${page.prefix}">
@@ -131,19 +152,19 @@ var generateIndex = async (options, indexPath, chunks) => {
   `);
   lines.push("}");
   const code = lines.join("\n");
-  await fs2.mkdir(path3.dirname(indexPath), {
+  yield fs2.mkdir(path3.dirname(indexPath), {
     recursive: true
   });
-  await fs2.writeFile(indexPath, formatCode(code));
-};
+  yield fs2.writeFile(indexPath, formatCode(code));
+});
 
 // src/generateMeta.ts
-import {existsSync} from "fs";
+import { existsSync } from "fs";
 import fs3 from "fs/promises";
 import path4 from "path";
-var generateMeta = async (_options, metaPath, pages) => {
+var generateMeta = (_options, metaPath, pages) => __async(void 0, null, function* () {
   const lines = [];
-  const importNames = new Set();
+  const importNames = /* @__PURE__ */ new Set();
   pages.forEach((p) => {
     if (!existsSync(p.source.replace(/\.tsx$/, ".pagemeta.ts"))) {
       return;
@@ -180,17 +201,18 @@ var generateMeta = async (_options, metaPath, pages) => {
   lines.push(";");
   lines.push("export const url = (u: AppUrl) => u;");
   const code = lines.join("\n");
-  await fs3.mkdir(path4.dirname(metaPath), {
+  yield fs3.mkdir(path4.dirname(metaPath), {
     recursive: true
   });
-  await fs3.writeFile(metaPath, formatCode(code));
-};
+  yield fs3.writeFile(metaPath, formatCode(code));
+});
 
 // src/build.ts
-var build = async (options) => {
-  const chunks = new Map();
+var build = (options) => __async(void 0, null, function* () {
+  const chunks = /* @__PURE__ */ new Map();
   const pages = [];
   walk.sync(options.pageRoot, (source, stat) => {
+    var _a;
     if (stat.isDirectory()) {
       return;
     }
@@ -212,7 +234,7 @@ var build = async (options) => {
     }
     if (/\.tsx$/.test(source)) {
       const componentName = path5.basename(source).replace(ext, "");
-      const prefix = options.chunkPrefixes.find((p) => url.startsWith(p)) ?? "/";
+      const prefix = (_a = options.chunkPrefixes.find((p) => url.startsWith(p))) != null ? _a : "/";
       const page = {
         source,
         url,
@@ -236,18 +258,18 @@ var build = async (options) => {
     }
   });
   try {
-    await fs4.access(options.outDir);
-    await fs4.rm(options.outDir, {
+    yield fs4.access(options.outDir);
+    yield fs4.rm(options.outDir, {
       recursive: true
     });
   } catch (_e) {
   }
   for (const [, chunk] of chunks) {
-    await generateChunk(options, chunk);
+    yield generateChunk(options, chunk);
   }
-  await generateIndex(options, path5.join(options.outDir, "index.tsx"), [...chunks.values()]);
-  await generateMeta(options, path5.join(options.outDir, "meta.ts"), pages);
-};
+  yield generateIndex(options, path5.join(options.outDir, "index.tsx"), [...chunks.values()]);
+  yield generateMeta(options, path5.join(options.outDir, "meta.ts"), pages);
+});
 export {
   build
 };
