@@ -46,8 +46,15 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Publush
+      - name: Publish Main
         run: npm publish
+        if: ( ${{ github.ref }} == 'master' )
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish Alpha
+        run: npm publish --tag alpha
+        if: ( ${{ github.ref }} != 'master' )
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
