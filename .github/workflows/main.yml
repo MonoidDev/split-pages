@@ -48,13 +48,13 @@ jobs:
 
       - name: Publish Main
         run: npm publish
-        if: ( ${{ github.ref }} == 'master' )
+        if: ${{ github.ref == 'master' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish Alpha
         run: npm publish --tag alpha
-        if: ( ${{ github.ref }} != 'master' )
+        if: ${{ github.ref == 'v1' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
