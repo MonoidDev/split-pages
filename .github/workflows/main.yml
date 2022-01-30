@@ -24,12 +24,18 @@ jobs:
           node-version: ${{ matrix.node }}
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Cache pnpm modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: 6.24.4
-
-      - name: Install deps and build (with cache)
-        uses: bahmutov/npm-install@v1
+          run_install: true
 
       - name: Lint
         run: pnpm run lint
