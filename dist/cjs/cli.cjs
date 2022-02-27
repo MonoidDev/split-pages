@@ -92,14 +92,19 @@ var generateChunk = (options, chunk) => __async(void 0, null, function* () {
     } from 'react-router-dom';
     import { NoMatch } from ${JSON.stringify(noMatchPath)};
   `);
+  if (options.containerModule) {
+    const containerModulePath = relativeImport(chunk.path, options.containerModule);
+    lines.push(`import Container from ${JSON.stringify(containerModulePath)}`);
+  }
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
     lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
   }
   const getRouteCode = (page) => {
+    const child = `<${page.importName} />`;
     return `
       <Route path="${page.url}" exact>
-        <${page.importName} />
+        ${options.containerModule ? `<Container>${child}</Container>` : child}
       </Route>
     `;
   };
@@ -110,7 +115,7 @@ var generateChunk = (options, chunk) => __async(void 0, null, function* () {
       <Route
         path="*"
       >
-        <NoMatch />
+      ${options.containerModule ? `<Container><NoMatch /></Container>` : `<NoMatch />`}
       </Route>
     </Switch>
   `;

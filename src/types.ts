@@ -7,6 +7,7 @@ export interface SplitPagesInputOptions {
   redirections?: {
     [path in string]: string;
   };
+  containerModule?: string;
 }
 
 export interface SplitPagesOptions extends SplitPagesInputOptions {
@@ -34,9 +35,6 @@ export interface ExtractMetaResult {
   searchType: string;
 }
 
-export interface PageMeta {}
-
 export interface ClientPageConfig<R extends AnyResolver = AnyResolver> {
-  meta?: PageMeta;
   props?: R;
 }

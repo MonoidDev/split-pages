@@ -1,3 +1,3 @@
 export * from './clientPage';
 
-export type { ClientPageConfig, PageMeta } from './types';
+export type { ClientPageConfig } from './types';

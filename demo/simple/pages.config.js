@@ -6,4 +6,5 @@ module.exports = {
   redirections: {
     '/xxx': '/'
   },
+  containerModule: './components/Container.tsx'
 };
