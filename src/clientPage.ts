@@ -1,5 +1,3 @@
-import { parse, stringify } from 'querystring';
-
 import React from 'react';
 
 import type { AnyResolver, UnknownResolver, OutputOf } from '@monoid-dev/reform';
@@ -15,7 +13,18 @@ export const definePage = <R extends AnyResolver = UnknownResolver>(
   const Page = () => {
     const location = useLocation();
 
-    const param = parse(location.search.slice(1)); // Removing the '?'
+    const param = new URLSearchParams(location.search.slice(1)); // Removing the '?'
+
+    let o: Record<string, string | string[]> = {};
+
+    param.forEach((_, key) => {
+      const values = param.getAll(key);
+      if (values.length > 0) {
+        o[key] = values;
+      } else {
+        o[key] = values[0];
+      }
+    });
 
     if (config.props) {
       const props = config.props.resolve(param);
@@ -33,5 +42,5 @@ export const definePage = <R extends AnyResolver = UnknownResolver>(
 };
 
 export const createUrl = (url: string, props: any) => {
-  return `${url}?${stringify(props)}`;
+  return `${url}?${new URLSearchParams(props).toString()}`;
 };

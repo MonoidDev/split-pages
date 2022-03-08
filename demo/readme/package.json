@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "ts": "pnpm run node -r esbuild-register",
+    "dev": "split-pages build && vite dev",
+    "postinstall": "ln -sf ../../../../dist/cjs/cli.cjs node_modules/.bin/split-pages"
+  },
+  "dependencies": {
+    "@monoid-dev/split-pages": "link:../../",
+    "vite": "^2.7.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^1.1.4"
+  }
+}
