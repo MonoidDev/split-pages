@@ -3,40 +3,74 @@ var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
-var __reExport = (target, module2, desc) => {
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
+var __reExport = (target, module2, copyDefault, desc) => {
   if (module2 && typeof module2 === "object" || typeof module2 === "function") {
     for (let key of __getOwnPropNames(module2))
-      if (!__hasOwnProp.call(target, key) && key !== "default")
-        __defProp(target, key, {get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable});
+      if (!__hasOwnProp.call(target, key) && (copyDefault || key !== "default"))
+        __defProp(target, key, { get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable });
   }
   return target;
 };
-var __toModule = (module2) => {
-  return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
+var __toESM = (module2, isNodeMode) => {
+  return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", !isNodeMode && module2 && module2.__esModule ? { get: () => module2.default, enumerable: true } : { value: module2, enumerable: true })), module2);
+};
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
 };
 
 // src/cli.ts
-var import_path6 = __toModule(require("path"));
-var import_yargs = __toModule(require("yargs"));
-var import_helpers = __toModule(require("yargs/helpers"));
+var import_path6 = __toESM(require("path"));
+var import_yargs = __toESM(require("yargs"));
+var import_helpers = require("yargs/helpers");
 
 // src/build.ts
-var import_promises4 = __toModule(require("fs/promises"));
-var import_path5 = __toModule(require("path"));
-var import_walkdir = __toModule(require("walkdir"));
+var import_promises4 = __toESM(require("fs/promises"));
+var import_path5 = __toESM(require("path"));
+var import_walkdir = __toESM(require("walkdir"));
 
 // src/generateChunk.ts
-var import_promises = __toModule(require("fs/promises"));
-var import_path2 = __toModule(require("path"));
+var import_promises = __toESM(require("fs/promises"));
+var import_path2 = __toESM(require("path"));
 
 // src/utils.ts
-var import_path = __toModule(require("path"));
-var import_prettier = __toModule(require("prettier"));
+var import_path = __toESM(require("path"));
+var import_prettier = __toESM(require("prettier"));
 var formatCode = (code) => {
-  return import_prettier.default.format(code, {parser: "babel"});
+  return import_prettier.default.format(code, { parser: "babel-ts" });
 };
 var relativeImport = (importer, target) => {
   let importPath = import_path.default.relative(import_path.default.dirname(importer), target).replace(/\.tsx?/, "");
@@ -47,7 +81,7 @@ var relativeImport = (importer, target) => {
 };
 
 // src/generateChunk.ts
-var generateChunk = async (options, chunk) => {
+var generateChunk = (options, chunk) => __async(void 0, null, function* () {
   const lines = [];
   const noMatchPath = relativeImport(chunk.path, `${options.pageRoot}/NoMatch`);
   lines.push(`
@@ -58,14 +92,19 @@ var generateChunk = async (options, chunk) => {
     } from 'react-router-dom';
     import { NoMatch } from ${JSON.stringify(noMatchPath)};
   `);
+  if (options.containerModule) {
+    const containerModulePath = relativeImport(chunk.path, options.containerModule);
+    lines.push(`import Container from ${JSON.stringify(containerModulePath)}`);
+  }
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
     lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
   }
   const getRouteCode = (page) => {
+    const child = `<${page.importName} />`;
     return `
       <Route path="${page.url}" exact>
-        <${page.importName} />
+        ${options.containerModule ? `<Container>${child}</Container>` : child}
       </Route>
     `;
   };
@@ -76,7 +115,7 @@ var generateChunk = async (options, chunk) => {
       <Route
         path="*"
       >
-        <NoMatch />
+      ${options.containerModule ? `<Container><NoMatch /></Container>` : `<NoMatch />`}
       </Route>
     </Switch>
   `;
@@ -92,16 +131,16 @@ var generateChunk = async (options, chunk) => {
     }
   `);
   const code = lines.join("\n");
-  await import_promises.default.mkdir(import_path2.default.dirname(chunk.path), {
+  yield import_promises.default.mkdir(import_path2.default.dirname(chunk.path), {
     recursive: true
   });
-  await import_promises.default.writeFile(chunk.path, formatCode(code));
-};
+  yield import_promises.default.writeFile(chunk.path, formatCode(code));
+});
 
 // src/generateIndex.ts
-var import_promises2 = __toModule(require("fs/promises"));
-var import_path3 = __toModule(require("path"));
-var generateIndex = async (options, indexPath, chunks) => {
+var import_promises2 = __toESM(require("fs/promises"));
+var import_path3 = __toESM(require("path"));
+var generateIndex = (options, indexPath, chunks) => __async(void 0, null, function* () {
   const getChunkCode = (page) => {
     return `
       <Route path="${page.prefix}">
@@ -156,66 +195,49 @@ var generateIndex = async (options, indexPath, chunks) => {
   `);
   lines.push("}");
   const code = lines.join("\n");
-  await import_promises2.default.mkdir(import_path3.default.dirname(indexPath), {
+  yield import_promises2.default.mkdir(import_path3.default.dirname(indexPath), {
     recursive: true
   });
-  await import_promises2.default.writeFile(indexPath, formatCode(code));
-};
+  yield import_promises2.default.writeFile(indexPath, formatCode(code));
+});
 
 // src/generateMeta.ts
-var import_fs = __toModule(require("fs"));
-var import_promises3 = __toModule(require("fs/promises"));
-var import_path4 = __toModule(require("path"));
-var generateMeta = async (_options, metaPath, pages) => {
+var import_promises3 = __toESM(require("fs/promises"));
+var import_path4 = __toESM(require("path"));
+var generateMeta = (_options, metaPath, pages) => __async(void 0, null, function* () {
   const lines = [];
-  const importNames = new Set();
-  pages.forEach((p) => {
-    if (!(0, import_fs.existsSync)(p.source.replace(/\.tsx$/, ".pagemeta.ts"))) {
-      return;
-    }
-    const importPath = relativeImport(metaPath, p.source.replace(".tsx", ".pagemeta.tsx"));
-    lines.push(`import { meta as ${p.importName} } from ${JSON.stringify(importPath)};`);
-    importNames.add(p.importName);
-  });
-  lines.push("export const meta = [");
-  pages.forEach((p) => {
-    let meta;
-    if (importNames.has(p.importName)) {
-      meta = `...${p.importName}`;
-    } else {
-      meta = "";
-    }
+  lines.push(`import { OutputOf } from '@monoid-dev/reform';`);
+  lines.push(`import { createUrl } from '@monoid-dev/split-pages/client';`);
+  for (const page of pages) {
+    const importPath = relativeImport(metaPath, page.source);
+    lines.push(`import type { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)}`);
+  }
+  lines.push("export type PageProps = {");
+  for (const page of pages) {
     lines.push(`
-      {
-        url: '${p.url}',
-        name: '${p.componentName}',
-        isDirectory: ${p.isDirectory},
-        listed: true,
-        staffOnly: false,
-        superuserOnly: false,
-        ${meta}
-      },
+      ${JSON.stringify(page.url)}: OutputOf<(typeof ${page.importName})['__R']>; 
     `);
-  });
-  lines.push("];");
-  lines.push("export type AppUrl =");
-  pages.forEach((p) => {
-    lines.push(`| ${JSON.stringify(p.url)}`);
-  });
-  lines.push(";");
-  lines.push("export const url = (u: AppUrl) => u;");
-  const code = lines.join("\n");
-  await import_promises3.default.mkdir(import_path4.default.dirname(metaPath), {
+  }
+  lines.push("};");
+  lines.push("export type AppUrl = keyof PageProps;");
+  lines.push(`
+    export function url<U extends AppUrl>(pathname: U, props: PageProps[U]) {
+      return createUrl(pathname, props);
+    }
+  `);
+  yield import_promises3.default.mkdir(import_path4.default.dirname(metaPath), {
     recursive: true
   });
-  await import_promises3.default.writeFile(metaPath, formatCode(code));
-};
+  const code = lines.join("\n");
+  yield import_promises3.default.writeFile(metaPath, formatCode(code));
+});
 
 // src/build.ts
-var build = async (options) => {
-  const chunks = new Map();
+var build = (options) => __async(void 0, null, function* () {
+  const chunks = /* @__PURE__ */ new Map();
   const pages = [];
   import_walkdir.default.sync(options.pageRoot, (source, stat) => {
+    var _a;
     if (stat.isDirectory()) {
       return;
     }
@@ -237,7 +259,7 @@ var build = async (options) => {
     }
     if (/\.tsx$/.test(source)) {
       const componentName = import_path5.default.basename(source).replace(ext, "");
-      const prefix = options.chunkPrefixes.find((p) => url.startsWith(p)) ?? "/";
+      const prefix = (_a = options.chunkPrefixes.find((p) => url.startsWith(p))) != null ? _a : "/";
       const page = {
         source,
         url,
@@ -261,18 +283,18 @@ var build = async (options) => {
     }
   });
   try {
-    await import_promises4.default.access(options.outDir);
-    await import_promises4.default.rm(options.outDir, {
+    yield import_promises4.default.access(options.outDir);
+    yield import_promises4.default.rm(options.outDir, {
       recursive: true
     });
   } catch (_e) {
   }
   for (const [, chunk] of chunks) {
-    await generateChunk(options, chunk);
+    yield generateChunk(options, chunk);
   }
-  await generateIndex(options, import_path5.default.join(options.outDir, "index.tsx"), [...chunks.values()]);
-  await generateMeta(options, import_path5.default.join(options.outDir, "meta.ts"), pages);
-};
+  yield generateIndex(options, import_path5.default.join(options.outDir, "index.tsx"), [...chunks.values()]);
+  yield generateMeta(options, import_path5.default.join(options.outDir, "meta.ts"), pages);
+});
 
 // src/cli.ts
 var main = () => {
@@ -284,26 +306,23 @@ var main = () => {
       default: "pages.config.js",
       normalize: true
     });
-  }, async (argv) => {
-    const {
-      config: configPath
-    } = argv;
+  }, (argv) => __async(exports, null, function* () {
+    const { config: configPath } = argv;
     let inputOptions;
     try {
       inputOptions = require(import_path6.default.resolve(process.cwd(), configPath));
     } catch (e) {
       if (e.code === "ERR_REQUIRE_ESM") {
-        inputOptions = (await import(import_path6.default.resolve(process.cwd(), configPath))).default;
+        inputOptions = (yield import(import_path6.default.resolve(process.cwd(), configPath))).default;
       } else {
         throw e;
       }
     }
-    const options = {
+    const options = __spreadValues({
       chunkPrefixes: [],
-      outDir: ".split-pages/",
-      ...inputOptions
-    };
-    await build(options);
-  }).help().demand(1, "Must provide a valid command").parse();
+      outDir: ".split-pages/"
+    }, inputOptions);
+    yield build(options);
+  })).help().demand(1, "Must provide a valid command").parse();
 };
 main();

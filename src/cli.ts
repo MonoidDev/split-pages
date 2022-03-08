@@ -13,27 +13,22 @@ interface Argv {
 }
 
 const main = () => {
-  const finalArgv = process.argv[0] === 'split-pages'
-    ? ['node', ...process.argv]
-    : process.argv;
+  const finalArgv = process.argv[0] === 'split-pages' ? ['node', ...process.argv] : process.argv;
 
-  yargs(hideBin(finalArgv))
+  (yargs(hideBin(finalArgv)) as any)
     .command(
       'build [config]',
       'build the pages. ',
-      (y) => {
-        y
-          .positional('config', {
-            description: 'path to the config, default to be pages.config.js',
-            type: 'string',
-            default: 'pages.config.js',
-            normalize: true,
-          });
+      (y: any) => {
+        y.positional('config', {
+          description: 'path to the config, default to be pages.config.js',
+          type: 'string',
+          default: 'pages.config.js',
+          normalize: true,
+        });
       },
       async (argv: Argv) => {
-        const {
-          config: configPath,
-        } = argv;
+        const { config: configPath } = argv;
 
         let inputOptions: SplitPagesInputOptions;
         try {

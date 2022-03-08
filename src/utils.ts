@@ -3,7 +3,7 @@ import path from 'path';
 import prettier from 'prettier';
 
 export const formatCode = (code: string): string => {
-  return prettier.format(code, { parser: 'babel' });
+  return prettier.format(code, { parser: 'babel-ts' });
 };
 
 export const relativeImport = (importer: string, target: string): string => {

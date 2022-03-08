@@ -1,9 +1,10 @@
 /**
  * @type {import('../../').SplitPagesInputOptions}
  */
-export default {
+module.exports = {
   pageRoot: './pages',
   redirections: {
     '/xxx': '/'
   },
+  containerModule: './components/Container.tsx'
 };

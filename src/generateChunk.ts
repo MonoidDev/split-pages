@@ -4,10 +4,7 @@ import path from 'path';
 import type { Chunk, Page, SplitPagesOptions } from './types';
 import { formatCode, relativeImport } from './utils';
 
-export const generateChunk = async (
-  options: SplitPagesOptions,
-  chunk: Chunk,
-): Promise<void> => {
+export const generateChunk = async (options: SplitPagesOptions, chunk: Chunk): Promise<void> => {
   const lines: string[] = [];
 
   const noMatchPath = relativeImport(chunk.path, `${options.pageRoot}/NoMatch`);
@@ -21,15 +18,25 @@ export const generateChunk = async (
     import { NoMatch } from ${JSON.stringify(noMatchPath)};
   `);
 
+  if (options.containerModule) {
+    const containerModulePath = relativeImport(chunk.path, options.containerModule);
+
+    lines.push(`import Container from ${JSON.stringify(containerModulePath)}`);
+  }
+
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
-    lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
+    lines.push(
+      `import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`,
+    );
   }
 
   const getRouteCode = (page: Page) => {
+    const child = `<${page.importName} />`;
+
     return `
       <Route path="${page.url}" exact>
-        <${page.importName} />
+        ${options.containerModule ? `<Container>${child}</Container>` : child}
       </Route>
     `;
   };
@@ -41,7 +48,7 @@ export const generateChunk = async (
       <Route
         path="*"
       >
-        <NoMatch />
+      ${options.containerModule ? `<Container><NoMatch /></Container>` : `<NoMatch />`}
       </Route>
     </Switch>
   `;

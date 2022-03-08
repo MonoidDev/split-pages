@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
+    "jsx": "react",
     "declaration": true,
     "emitDeclarationOnly": true,
     "strict": true,

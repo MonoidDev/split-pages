@@ -1,7 +1,3 @@
-export {
-  build,
-} from './build';
+export { build } from './build';
 
-export {
-  SplitPagesInputOptions,
-} from './types';
+export { SplitPagesInputOptions, ClientPageConfig } from './types';

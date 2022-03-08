@@ -81,15 +81,7 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
     await generateChunk(options, chunk);
   }
 
-  await generateIndex(
-    options,
-    path.join(options.outDir, 'index.tsx'),
-    [...chunks.values()],
-  );
+  await generateIndex(options, path.join(options.outDir, 'index.tsx'), [...chunks.values()]);
 
-  await generateMeta(
-    options,
-    path.join(options.outDir, 'meta.ts'),
-    pages,
-  );
+  await generateMeta(options, path.join(options.outDir, 'meta.ts'), pages);
 };

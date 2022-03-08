@@ -2,3 +2,4 @@
 *.js
 dist/
 demo
+esbuild.mjs

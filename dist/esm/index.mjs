@@ -1,3 +1,24 @@
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
+
 // src/build.ts
 import fs4 from "fs/promises";
 import path5 from "path";
@@ -11,7 +32,7 @@ import path2 from "path";
 import path from "path";
 import prettier from "prettier";
 var formatCode = (code) => {
-  return prettier.format(code, {parser: "babel"});
+  return prettier.format(code, { parser: "babel-ts" });
 };
 var relativeImport = (importer, target) => {
   let importPath = path.relative(path.dirname(importer), target).replace(/\.tsx?/, "");
@@ -22,7 +43,7 @@ var relativeImport = (importer, target) => {
 };
 
 // src/generateChunk.ts
-var generateChunk = async (options, chunk) => {
+var generateChunk = (options, chunk) => __async(void 0, null, function* () {
   const lines = [];
   const noMatchPath = relativeImport(chunk.path, `${options.pageRoot}/NoMatch`);
   lines.push(`
@@ -33,14 +54,19 @@ var generateChunk = async (options, chunk) => {
     } from 'react-router-dom';
     import { NoMatch } from ${JSON.stringify(noMatchPath)};
   `);
+  if (options.containerModule) {
+    const containerModulePath = relativeImport(chunk.path, options.containerModule);
+    lines.push(`import Container from ${JSON.stringify(containerModulePath)}`);
+  }
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
     lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
   }
   const getRouteCode = (page) => {
+    const child = `<${page.importName} />`;
     return `
       <Route path="${page.url}" exact>
-        <${page.importName} />
+        ${options.containerModule ? `<Container>${child}</Container>` : child}
       </Route>
     `;
   };
@@ -51,7 +77,7 @@ var generateChunk = async (options, chunk) => {
       <Route
         path="*"
       >
-        <NoMatch />
+      ${options.containerModule ? `<Container><NoMatch /></Container>` : `<NoMatch />`}
       </Route>
     </Switch>
   `;
@@ -67,16 +93,16 @@ var generateChunk = async (options, chunk) => {
     }
   `);
   const code = lines.join("\n");
-  await fs.mkdir(path2.dirname(chunk.path), {
+  yield fs.mkdir(path2.dirname(chunk.path), {
     recursive: true
   });
-  await fs.writeFile(chunk.path, formatCode(code));
-};
+  yield fs.writeFile(chunk.path, formatCode(code));
+});
 
 // src/generateIndex.ts
 import fs2 from "fs/promises";
 import path3 from "path";
-var generateIndex = async (options, indexPath, chunks) => {
+var generateIndex = (options, indexPath, chunks) => __async(void 0, null, function* () {
   const getChunkCode = (page) => {
     return `
       <Route path="${page.prefix}">
@@ -131,66 +157,49 @@ var generateIndex = async (options, indexPath, chunks) => {
   `);
   lines.push("}");
   const code = lines.join("\n");
-  await fs2.mkdir(path3.dirname(indexPath), {
+  yield fs2.mkdir(path3.dirname(indexPath), {
     recursive: true
   });
-  await fs2.writeFile(indexPath, formatCode(code));
-};
+  yield fs2.writeFile(indexPath, formatCode(code));
+});
 
 // src/generateMeta.ts
-import {existsSync} from "fs";
 import fs3 from "fs/promises";
 import path4 from "path";
-var generateMeta = async (_options, metaPath, pages) => {
+var generateMeta = (_options, metaPath, pages) => __async(void 0, null, function* () {
   const lines = [];
-  const importNames = new Set();
-  pages.forEach((p) => {
-    if (!existsSync(p.source.replace(/\.tsx$/, ".pagemeta.ts"))) {
-      return;
-    }
-    const importPath = relativeImport(metaPath, p.source.replace(".tsx", ".pagemeta.tsx"));
-    lines.push(`import { meta as ${p.importName} } from ${JSON.stringify(importPath)};`);
-    importNames.add(p.importName);
-  });
-  lines.push("export const meta = [");
-  pages.forEach((p) => {
-    let meta;
-    if (importNames.has(p.importName)) {
-      meta = `...${p.importName}`;
-    } else {
-      meta = "";
-    }
+  lines.push(`import { OutputOf } from '@monoid-dev/reform';`);
+  lines.push(`import { createUrl } from '@monoid-dev/split-pages/client';`);
+  for (const page of pages) {
+    const importPath = relativeImport(metaPath, page.source);
+    lines.push(`import type { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)}`);
+  }
+  lines.push("export type PageProps = {");
+  for (const page of pages) {
     lines.push(`
-      {
-        url: '${p.url}',
-        name: '${p.componentName}',
-        isDirectory: ${p.isDirectory},
-        listed: true,
-        staffOnly: false,
-        superuserOnly: false,
-        ${meta}
-      },
+      ${JSON.stringify(page.url)}: OutputOf<(typeof ${page.importName})['__R']>; 
     `);
-  });
-  lines.push("];");
-  lines.push("export type AppUrl =");
-  pages.forEach((p) => {
-    lines.push(`| ${JSON.stringify(p.url)}`);
-  });
-  lines.push(";");
-  lines.push("export const url = (u: AppUrl) => u;");
-  const code = lines.join("\n");
-  await fs3.mkdir(path4.dirname(metaPath), {
+  }
+  lines.push("};");
+  lines.push("export type AppUrl = keyof PageProps;");
+  lines.push(`
+    export function url<U extends AppUrl>(pathname: U, props: PageProps[U]) {
+      return createUrl(pathname, props);
+    }
+  `);
+  yield fs3.mkdir(path4.dirname(metaPath), {
     recursive: true
   });
-  await fs3.writeFile(metaPath, formatCode(code));
-};
+  const code = lines.join("\n");
+  yield fs3.writeFile(metaPath, formatCode(code));
+});
 
 // src/build.ts
-var build = async (options) => {
-  const chunks = new Map();
+var build = (options) => __async(void 0, null, function* () {
+  const chunks = /* @__PURE__ */ new Map();
   const pages = [];
   walk.sync(options.pageRoot, (source, stat) => {
+    var _a;
     if (stat.isDirectory()) {
       return;
     }
@@ -212,7 +221,7 @@ var build = async (options) => {
     }
     if (/\.tsx$/.test(source)) {
       const componentName = path5.basename(source).replace(ext, "");
-      const prefix = options.chunkPrefixes.find((p) => url.startsWith(p)) ?? "/";
+      const prefix = (_a = options.chunkPrefixes.find((p) => url.startsWith(p))) != null ? _a : "/";
       const page = {
         source,
         url,
@@ -236,18 +245,18 @@ var build = async (options) => {
     }
   });
   try {
-    await fs4.access(options.outDir);
-    await fs4.rm(options.outDir, {
+    yield fs4.access(options.outDir);
+    yield fs4.rm(options.outDir, {
       recursive: true
     });
   } catch (_e) {
   }
   for (const [, chunk] of chunks) {
-    await generateChunk(options, chunk);
+    yield generateChunk(options, chunk);
   }
-  await generateIndex(options, path5.join(options.outDir, "index.tsx"), [...chunks.values()]);
-  await generateMeta(options, path5.join(options.outDir, "meta.ts"), pages);
-};
+  yield generateIndex(options, path5.join(options.outDir, "index.tsx"), [...chunks.values()]);
+  yield generateMeta(options, path5.join(options.outDir, "meta.ts"), pages);
+});
 export {
   build
 };
