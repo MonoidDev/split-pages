@@ -34,7 +34,6 @@ __export(client_exports, {
 });
 
 // src/clientPage.ts
-var import_querystring = require("querystring");
 var import_react = __toESM(require("react"));
 var import_react_router_dom = require("react-router-dom");
 
@@ -50,7 +49,16 @@ var InvalidSearch = class extends Error {
 var definePage = (config, ClientPage) => {
   const Page = () => {
     const location = (0, import_react_router_dom.useLocation)();
-    const param = (0, import_querystring.parse)(location.search.slice(1));
+    const param = new URLSearchParams(location.search.slice(1));
+    let o = {};
+    param.forEach((_, key) => {
+      const values = param.getAll(key);
+      if (values.length > 0) {
+        o[key] = values;
+      } else {
+        o[key] = values[0];
+      }
+    });
     if (config.props) {
       const props = config.props.resolve(param);
       if (props._tag === "left") {
@@ -63,7 +71,7 @@ var definePage = (config, ClientPage) => {
   return Page;
 };
 var createUrl = (url, props) => {
-  return `${url}?${(0, import_querystring.stringify)(props)}`;
+  return `${url}?${new URLSearchParams(props).toString()}`;
 };
 module.exports = __toCommonJS(client_exports);
 // Annotate the CommonJS export names for ESM import in node:
