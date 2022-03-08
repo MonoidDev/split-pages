@@ -27,7 +27,7 @@ module.exports = {
 };
 ```
 
-You probably want to add `.split-pages/` to your `.gitignore`, too. This is where the auto-generated code we put.
+You probably want to add `.split-pages/` to your `.gitignore`, too. This is where  we put the auto-generated code by default.
 
 Now, create 3 pages `A`, `B` and `NoMatch` under `./src/pages`, populating them with some content:
 
@@ -182,12 +182,12 @@ To do this, simply provide a `struct` schema to the `props` field of the first p
 ```tsx
 import React from 'react';
 import { definePage } from '@monoid-dev/split-pages/client';
-import { stringField, struct } from '@monoid-dev/reform';
+import { numberField, struct } from '@monoid-dev/reform';
 
 export const A = definePage(
   {
     props: struct({
-      a: stringField(),
+      a: numberField(),
     }),
   },
   ({ a }) => {
@@ -196,7 +196,7 @@ export const A = definePage(
 );
 ```
 
-Here, we introduce [@monoid-dev/reform](https://www.npmjs.com/package/@monoid-dev/reform), a runtime type checking and conversion library. It is similar to `io-ts`, `joi` or `yup`, but more satisfies our needs. Here we ask the URL for page `A` to support queries like `?a=string`, and missing `a` parameter will result in a thrown error (you probably want to catch that through a `componentDidCatch`). The arguments are passed to the function where you define the page component, and you can render that to your page.
+Here, we introduce [@monoid-dev/reform](https://www.npmjs.com/package/@monoid-dev/reform), a runtime type checking and conversion library. It is similar to `io-ts`, `joi` or `yup`, but more satisfies our needs. Here we ask the URL for page `A` to support queries like `?a=string`, and a non-numeric `a` parameter will result in a thrown error (you probably want to catch that through a `componentDidCatch`). The arguments are passed to the function where you define the page component, and you can render that to your page.
 
 ### url
 
@@ -208,7 +208,7 @@ Example:
 ```tsx
 import { url } from '../.split-pages/meta';
 
-url('/A', { a: 'Alice' })
+url('/A', { a: 123 })
 url('/B', {})
 ```
 
@@ -218,7 +218,7 @@ url('/B', {})
 import type { AppUrl } from '../.split-pages/meta';
 ```
 
-`AppUrl` is the union of all possibly paths in your app. It is useful if you want to add additional metadata to each page:
+`AppUrl` is the union of all possible paths in your app. It is useful if you want to add additional metadata to each page:
 
 ```tsx
 import type { AppUrl } from '../.split-pages/meta';
@@ -237,9 +237,9 @@ const pageTitles: { [K in AppUrl]: string } = {
 
 2. You can't define runtime metadata at each page. Instead, grap the `AppUrl` union from the genereted data and gather them into the same module. This is because we cannot import those data without importing the entire page, if we want full JavaScript flexibility. 
 
-3. No support of react-router other than 5. React router introduces huge incompatibility between major versions and following that is not one of our interests.
+3. No support for react-router other than v5. React router introduces huge incompatibility between major versions and following that is not one of our interests.
 
-4. No support of pure JavaScript, TypeScript is REQUIRED. If your application scales to the size that you need auto navigation generation, you probably already use TypeScript.
+4. No support for pure JavaScript. TypeScript is REQUIRED. If your application scales to the size that you need auto navigation generation, you are probably already using TypeScript.
   
 ## Acknowledgements
 
