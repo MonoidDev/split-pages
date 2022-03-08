@@ -19,7 +19,7 @@ export const definePage = <R extends AnyResolver = UnknownResolver>(
 
     param.forEach((_, key) => {
       const values = param.getAll(key);
-      if (values.length > 0) {
+      if (values.length > 1) {
         o[key] = values;
       } else {
         o[key] = values[0];

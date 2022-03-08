@@ -1,6 +1,6 @@
 {
   "name": "@monoid-dev/split-pages",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": false,
   "description": "Generate routing with code-splitting",
   "author": "Chenyu Wang <cwang592@usc.edu>",
