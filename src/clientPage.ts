@@ -27,7 +27,7 @@ export const definePage = <R extends AnyResolver = UnknownResolver>(
     });
 
     if (config.props) {
-      const props = config.props.resolve(param);
+      const props = config.props.resolve(o);
 
       if (props._tag === 'left') {
         throw new InvalidSearch('Invalid search parameters', props);
