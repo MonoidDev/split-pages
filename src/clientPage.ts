@@ -42,5 +42,13 @@ export const definePage = <R extends AnyResolver = UnknownResolver>(
 };
 
 export const createUrl = (url: string, props: any) => {
-  return `${url}?${new URLSearchParams(props).toString()}`;
+  const converted: any = {};
+
+  for (const [key, value] of Object.keys(props)) {
+    if (value != null) {
+      converted[key] = value;
+    }
+  }
+
+  return `${url}?${new URLSearchParams(converted).toString()}`;
 };
