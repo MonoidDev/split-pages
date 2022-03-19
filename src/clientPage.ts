@@ -44,7 +44,7 @@ export const definePage = <R extends AnyResolver = UnknownResolver>(
 export const createUrl = (url: string, props: any) => {
   const converted: any = {};
 
-  for (const [key, value] of Object.keys(props)) {
+  for (const [key, value] of Object.entries(props)) {
     if (value != null) {
       converted[key] = value;
     }
