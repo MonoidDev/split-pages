@@ -8,6 +8,9 @@ var InvalidSearch = class extends Error {
     super(message);
     this.result = result;
   }
+  toString() {
+    return `${JSON.stringify(this.message)}: ${this.result}`;
+  }
 };
 
 // src/clientPage.ts
@@ -18,14 +21,14 @@ var definePage = (config, ClientPage) => {
     let o = {};
     param.forEach((_, key) => {
       const values = param.getAll(key);
-      if (values.length > 0) {
+      if (values.length > 1) {
         o[key] = values;
       } else {
         o[key] = values[0];
       }
     });
     if (config.props) {
-      const props = config.props.resolve(param);
+      const props = config.props.resolve(o);
       if (props._tag === "left") {
         throw new InvalidSearch("Invalid search parameters", props);
       }
@@ -36,7 +39,13 @@ var definePage = (config, ClientPage) => {
   return Page;
 };
 var createUrl = (url, props) => {
-  return `${url}?${new URLSearchParams(props).toString()}`;
+  const converted = {};
+  for (const [key, value] of Object.entries(props)) {
+    if (value != null) {
+      converted[key] = value;
+    }
+  }
+  return `${url}?${new URLSearchParams(converted).toString()}`;
 };
 export {
   createUrl,

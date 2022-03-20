@@ -37,7 +37,35 @@ export const generateMeta = async (
   lines.push('export type AppUrl = keyof PageProps;');
 
   lines.push(`
-    export function url<U extends AppUrl>(pathname: U, props: PageProps[U]) {
+    type OmitIfNotOptional<T extends object> = {
+      [Key in keyof T as undefined extends T[Key] ? Key : never]: T[Key];
+    };
+    
+    type OmitIfOptional<T extends object> = {
+      [Key in keyof T as undefined extends T[Key] ? never : Key]: T[Key];
+    };
+    
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    type PassThroughUnion = String | Number | Date | Function | RegExp; // May be completed with other builtin classes.
+    
+    export type MakeUndefinableFieldsOptional<
+      T,
+      ExtraPassThroughTypes = never,
+    > = T extends PassThroughUnion | ExtraPassThroughTypes
+      ? T
+      : T extends (infer E)[]
+      ? MakeUndefinableFieldsOptional<E>[]
+      : T extends object
+      ? {
+          [Key in keyof OmitIfOptional<T>]: MakeUndefinableFieldsOptional<T[Key]>;
+        } & {
+          [Key in keyof OmitIfNotOptional<T>]?: MakeUndefinableFieldsOptional<
+            T[Key]
+          >;
+        }
+      : T;
+
+    export function url<U extends AppUrl>(pathname: U, props: MakeUndefinableFieldsOptional<PageProps[U]>) {
       return createUrl(pathname, props);
     }
   `);

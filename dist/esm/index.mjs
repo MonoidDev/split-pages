@@ -1,24 +1,3 @@
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
-
 // src/build.ts
 import fs4 from "fs/promises";
 import path5 from "path";
@@ -43,7 +22,7 @@ var relativeImport = (importer, target) => {
 };
 
 // src/generateChunk.ts
-var generateChunk = (options, chunk) => __async(void 0, null, function* () {
+var generateChunk = async (options, chunk) => {
   const lines = [];
   const noMatchPath = relativeImport(chunk.path, `${options.pageRoot}/NoMatch`);
   lines.push(`
@@ -93,16 +72,16 @@ var generateChunk = (options, chunk) => __async(void 0, null, function* () {
     }
   `);
   const code = lines.join("\n");
-  yield fs.mkdir(path2.dirname(chunk.path), {
+  await fs.mkdir(path2.dirname(chunk.path), {
     recursive: true
   });
-  yield fs.writeFile(chunk.path, formatCode(code));
-});
+  await fs.writeFile(chunk.path, formatCode(code));
+};
 
 // src/generateIndex.ts
 import fs2 from "fs/promises";
 import path3 from "path";
-var generateIndex = (options, indexPath, chunks) => __async(void 0, null, function* () {
+var generateIndex = async (options, indexPath, chunks) => {
   const getChunkCode = (page) => {
     return `
       <Route path="${page.prefix}">
@@ -157,16 +136,16 @@ var generateIndex = (options, indexPath, chunks) => __async(void 0, null, functi
   `);
   lines.push("}");
   const code = lines.join("\n");
-  yield fs2.mkdir(path3.dirname(indexPath), {
+  await fs2.mkdir(path3.dirname(indexPath), {
     recursive: true
   });
-  yield fs2.writeFile(indexPath, formatCode(code));
-});
+  await fs2.writeFile(indexPath, formatCode(code));
+};
 
 // src/generateMeta.ts
 import fs3 from "fs/promises";
 import path4 from "path";
-var generateMeta = (_options, metaPath, pages) => __async(void 0, null, function* () {
+var generateMeta = async (_options, metaPath, pages) => {
   const lines = [];
   lines.push(`import { OutputOf } from '@monoid-dev/reform';`);
   lines.push(`import { createUrl } from '@monoid-dev/split-pages/client';`);
@@ -183,23 +162,50 @@ var generateMeta = (_options, metaPath, pages) => __async(void 0, null, function
   lines.push("};");
   lines.push("export type AppUrl = keyof PageProps;");
   lines.push(`
-    export function url<U extends AppUrl>(pathname: U, props: PageProps[U]) {
+    type OmitIfNotOptional<T extends object> = {
+      [Key in keyof T as undefined extends T[Key] ? Key : never]: T[Key];
+    };
+    
+    type OmitIfOptional<T extends object> = {
+      [Key in keyof T as undefined extends T[Key] ? never : Key]: T[Key];
+    };
+    
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    type PassThroughUnion = String | Number | Date | Function | RegExp; // May be completed with other builtin classes.
+    
+    export type MakeUndefinableFieldsOptional<
+      T,
+      ExtraPassThroughTypes = never,
+    > = T extends PassThroughUnion | ExtraPassThroughTypes
+      ? T
+      : T extends (infer E)[]
+      ? MakeUndefinableFieldsOptional<E>[]
+      : T extends object
+      ? {
+          [Key in keyof OmitIfOptional<T>]: MakeUndefinableFieldsOptional<T[Key]>;
+        } & {
+          [Key in keyof OmitIfNotOptional<T>]?: MakeUndefinableFieldsOptional<
+            T[Key]
+          >;
+        }
+      : T;
+
+    export function url<U extends AppUrl>(pathname: U, props: MakeUndefinableFieldsOptional<PageProps[U]>) {
       return createUrl(pathname, props);
     }
   `);
-  yield fs3.mkdir(path4.dirname(metaPath), {
+  await fs3.mkdir(path4.dirname(metaPath), {
     recursive: true
   });
   const code = lines.join("\n");
-  yield fs3.writeFile(metaPath, formatCode(code));
-});
+  await fs3.writeFile(metaPath, formatCode(code));
+};
 
 // src/build.ts
-var build = (options) => __async(void 0, null, function* () {
+var build = async (options) => {
   const chunks = /* @__PURE__ */ new Map();
   const pages = [];
   walk.sync(options.pageRoot, (source, stat) => {
-    var _a;
     if (stat.isDirectory()) {
       return;
     }
@@ -221,7 +227,7 @@ var build = (options) => __async(void 0, null, function* () {
     }
     if (/\.tsx$/.test(source)) {
       const componentName = path5.basename(source).replace(ext, "");
-      const prefix = (_a = options.chunkPrefixes.find((p) => url.startsWith(p))) != null ? _a : "/";
+      const prefix = options.chunkPrefixes.find((p) => url.startsWith(p)) ?? "/";
       const page = {
         source,
         url,
@@ -245,18 +251,18 @@ var build = (options) => __async(void 0, null, function* () {
     }
   });
   try {
-    yield fs4.access(options.outDir);
-    yield fs4.rm(options.outDir, {
+    await fs4.access(options.outDir);
+    await fs4.rm(options.outDir, {
       recursive: true
     });
   } catch (_e) {
   }
   for (const [, chunk] of chunks) {
-    yield generateChunk(options, chunk);
+    await generateChunk(options, chunk);
   }
-  yield generateIndex(options, path5.join(options.outDir, "index.tsx"), [...chunks.values()]);
-  yield generateMeta(options, path5.join(options.outDir, "meta.ts"), pages);
-});
+  await generateIndex(options, path5.join(options.outDir, "index.tsx"), [...chunks.values()]);
+  await generateMeta(options, path5.join(options.outDir, "meta.ts"), pages);
+};
 export {
   build
 };
