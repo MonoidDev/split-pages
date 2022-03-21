@@ -168,9 +168,9 @@ Example:
 import React from 'react';
 import { definePage } from '@monoid-dev/split-pages/client';
 
-export const A = definePage({}, (props) => {
+export const A = definePage((props) => {
   return <>A</>;
-});
+}, {});
 ```
 
 Usage:
@@ -185,13 +185,13 @@ import { definePage } from '@monoid-dev/split-pages/client';
 import { numberField, struct } from '@monoid-dev/reform';
 
 export const A = definePage(
+  ({ a }) => {
+    return <>{a}</>;
+  },
   {
     props: struct({
       a: numberField(),
     }),
-  },
-  ({ a }) => {
-    return <>{a}</>;
   },
 );
 ```

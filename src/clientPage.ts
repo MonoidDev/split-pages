@@ -7,8 +7,8 @@ import { InvalidSearch } from './errors';
 import { ClientPageConfig } from './types';
 
 export const definePage = <R extends AnyResolver = UnknownResolver>(
-  config: ClientPageConfig<R>,
   ClientPage: React.VFC<OutputOf<R>>,
+  config: ClientPageConfig<R>,
 ): React.VFC & { __R: R } => {
   const Page = () => {
     const location = useLocation();

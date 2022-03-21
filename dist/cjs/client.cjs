@@ -49,7 +49,7 @@ var InvalidSearch = class extends Error {
 };
 
 // src/clientPage.ts
-var definePage = (config, ClientPage) => {
+var definePage = (ClientPage, config) => {
   const Page = () => {
     const location = (0, import_react_router_dom.useLocation)();
     const param = new URLSearchParams(location.search.slice(1));
