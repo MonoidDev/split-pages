@@ -20,6 +20,9 @@ var relativeImport = (importer, target) => {
   }
   return importPath;
 };
+var normalizePath = (p) => {
+  return p.replace(/\\/g, "/");
+};
 
 // src/generateChunk.ts
 var generateChunk = async (options, chunk) => {
@@ -31,11 +34,11 @@ var generateChunk = async (options, chunk) => {
       Switch,
       Route,
     } from 'react-router-dom';
-    import { NoMatch } from ${JSON.stringify(noMatchPath)};
+    import { NoMatch } from ${JSON.stringify(normalizePath(noMatchPath))};
   `);
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
-    lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
+    lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(normalizePath(importPath))};`);
   }
   const getRouteCode = (page) => {
     return `
@@ -93,18 +96,18 @@ var generateIndex = async (options, indexPath, chunks) => {
       Route,
       Redirect,
     } from 'react-router-dom';
-    import { NoMatch } from ${JSON.stringify(noMatchPath)};
+    import { NoMatch } from ${JSON.stringify(normalizePath(noMatchPath))};
   `);
   for (const chunk of chunks) {
     if (!chunk.isLazy) {
       const importPath = relativeImport(indexPath, chunk.path);
-      lines.push(`import ${chunk.importName} from ${JSON.stringify(importPath)};`);
+      lines.push(`import ${chunk.importName} from ${JSON.stringify(normalizePath(importPath))};`);
     }
   }
   for (const chunk of chunks) {
     if (chunk.isLazy) {
       const importPath = relativeImport(indexPath, chunk.path);
-      lines.push(`const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(importPath)}))`);
+      lines.push(`const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(normalizePath(importPath))}))`);
     }
   }
   lines.push("export default function SplitPagesIndex() {");
@@ -195,7 +198,7 @@ var build = async (options) => {
       return;
     }
     const ext = path5.extname(source);
-    const url = `/${path5.relative(options.pageRoot, source).replace(ext, "")}`;
+    const url = normalizePath(`/${path5.relative(options.pageRoot, source).replace(ext, "")}`);
     const importName = `${url.replace(/[/.]/g, "_")}`;
     if (/\.pagemeta\.tsx?$/.test(source)) {
       if (/index\.pagemeta\.tsx?$/.test(path5.basename(source))) {
@@ -245,7 +248,9 @@ var build = async (options) => {
   for (const [, chunk] of chunks) {
     await generateChunk(options, chunk);
   }
-  await generateIndex(options, path5.join(options.outDir, "index.tsx"), [...chunks.values()]);
+  await generateIndex(options, path5.join(options.outDir, "index.tsx"), [
+    ...chunks.values()
+  ]);
   await generateMeta(options, path5.join(options.outDir, "meta.ts"), pages);
 };
 export {

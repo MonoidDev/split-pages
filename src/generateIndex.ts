@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { Chunk, SplitPagesOptions } from './types';
-import { formatCode, relativeImport } from './utils';
+import { formatCode, normalizePath, relativeImport } from './utils';
 
 export const generateIndex = async (
   options: SplitPagesOptions,
@@ -28,14 +28,14 @@ export const generateIndex = async (
       Route,
       Redirect,
     } from 'react-router-dom';
-    import { NoMatch } from ${JSON.stringify(noMatchPath)};
+    import { NoMatch } from ${JSON.stringify(normalizePath(noMatchPath))};
   `);
 
   for (const chunk of chunks) {
     if (!chunk.isLazy) {
       const importPath = relativeImport(indexPath, chunk.path);
 
-      lines.push(`import ${chunk.importName} from ${JSON.stringify(importPath)};`);
+      lines.push(`import ${chunk.importName} from ${JSON.stringify(normalizePath(importPath))};`);
     }
   }
 
@@ -43,7 +43,7 @@ export const generateIndex = async (
     if (chunk.isLazy) {
       const importPath = relativeImport(indexPath, chunk.path);
 
-      lines.push(`const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(importPath)}))`);
+      lines.push(`const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(normalizePath(importPath))}))`);
     }
   }
 

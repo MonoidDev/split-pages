@@ -15,3 +15,7 @@ export const relativeImport = (importer: string, target: string): string => {
 
   return importPath;
 };
+
+export const normalizePath = (p: string): string => {
+  return p.replace(/\\/g, '/');
+};

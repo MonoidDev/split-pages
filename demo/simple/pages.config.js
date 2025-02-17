@@ -1,5 +1,5 @@
 /**
- * @type {import('../../').SplitPagesInputOptions}
+ * @type {import('../../dist/types').SplitPagesInputOptions}
  */
 export default {
   pageRoot: './pages',

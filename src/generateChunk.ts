@@ -1,12 +1,12 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
-import type { Chunk, Page, SplitPagesOptions } from './types';
-import { formatCode, relativeImport } from './utils';
+import type { Chunk, Page, SplitPagesOptions } from "./types";
+import { formatCode, normalizePath, relativeImport } from "./utils";
 
 export const generateChunk = async (
   options: SplitPagesOptions,
-  chunk: Chunk,
+  chunk: Chunk
 ): Promise<void> => {
   const lines: string[] = [];
 
@@ -18,12 +18,16 @@ export const generateChunk = async (
       Switch,
       Route,
     } from 'react-router-dom';
-    import { NoMatch } from ${JSON.stringify(noMatchPath)};
+    import { NoMatch } from ${JSON.stringify(normalizePath(noMatchPath))};
   `);
 
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
-    lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
+    lines.push(
+      `import { ${page.componentName} as ${
+        page.importName
+      } } from ${JSON.stringify(normalizePath(importPath))};`
+    );
   }
 
   const getRouteCode = (page: Page) => {
@@ -36,7 +40,7 @@ export const generateChunk = async (
 
   const switchCode = `
     <Switch>
-      ${chunk.pages.map(getRouteCode).join('\n')}
+      ${chunk.pages.map(getRouteCode).join("\n")}
 
       <Route
         path="*"
@@ -60,7 +64,7 @@ export const generateChunk = async (
     }
   `);
 
-  const code = lines.join('\n');
+  const code = lines.join("\n");
 
   await fs.mkdir(path.dirname(chunk.path), {
     recursive: true,

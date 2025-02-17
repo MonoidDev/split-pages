@@ -1,12 +1,13 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
-import walk from 'walkdir';
+import walk from "walkdir";
 
-import { generateChunk } from './generateChunk';
-import { generateIndex } from './generateIndex';
-import { generateMeta } from './generateMeta';
-import { Chunk, Page, SplitPagesOptions } from './types';
+import { generateChunk } from "./generateChunk";
+import { generateIndex } from "./generateIndex";
+import { generateMeta } from "./generateMeta";
+import { Chunk, Page, SplitPagesOptions } from "./types";
+import { normalizePath } from "./utils";
 
 export const build = async (options: SplitPagesOptions): Promise<void> => {
   const chunks = new Map<string, Chunk>();
@@ -18,15 +19,17 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
     }
 
     const ext = path.extname(source);
-    const url = `/${path.relative(options.pageRoot, source).replace(ext, '')}`;
-    const importName = `${url.replace(/[/.]/g, '_')}`;
+    const url = normalizePath(`/${path
+      .relative(options.pageRoot, source)
+      .replace(ext, "")}`);
+    const importName = `${url.replace(/[/.]/g, "_")}`;
 
     if (/\.pagemeta\.tsx?$/.test(source)) {
       if (/index\.pagemeta\.tsx?$/.test(path.basename(source))) {
         const page: Page = {
           source,
           url: path.dirname(url),
-          componentName: '',
+          componentName: "",
           isDirectory: true,
           importName,
         };
@@ -38,8 +41,9 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
     }
 
     if (/\.tsx$/.test(source)) {
-      const componentName = path.basename(source).replace(ext, '');
-      const prefix = options.chunkPrefixes.find((p) => url.startsWith(p)) ?? '/';
+      const componentName = path.basename(source).replace(ext, "");
+      const prefix =
+        options.chunkPrefixes.find((p) => url.startsWith(p)) ?? "/";
 
       const page: Page = {
         source,
@@ -52,13 +56,13 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
       pages.push(page);
 
       if (!chunks.has(prefix)) {
-        const filename = prefix === '/' ? 'default' : prefix;
+        const filename = prefix === "/" ? "default" : prefix;
         chunks.set(prefix, {
           prefix,
           path: path.join(options.outDir, `${filename}.tsx`),
           pages: [],
-          importName: `Chunk_${filename.replace(/\//g, '_')}`,
-          isLazy: prefix !== '/',
+          importName: `Chunk_${filename.replace(/\//g, "_")}`,
+          isLazy: prefix !== "/",
         });
       }
 
@@ -81,15 +85,9 @@ export const build = async (options: SplitPagesOptions): Promise<void> => {
     await generateChunk(options, chunk);
   }
 
-  await generateIndex(
-    options,
-    path.join(options.outDir, 'index.tsx'),
-    [...chunks.values()],
-  );
+  await generateIndex(options, path.join(options.outDir, "index.tsx"), [
+    ...chunks.values(),
+  ]);
 
-  await generateMeta(
-    options,
-    path.join(options.outDir, 'meta.ts'),
-    pages,
-  );
+  await generateMeta(options, path.join(options.outDir, "meta.ts"), pages);
 };

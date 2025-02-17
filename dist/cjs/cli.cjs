@@ -45,6 +45,9 @@ var relativeImport = (importer, target) => {
   }
   return importPath;
 };
+var normalizePath = (p) => {
+  return p.replace(/\\/g, "/");
+};
 
 // src/generateChunk.ts
 var generateChunk = async (options, chunk) => {
@@ -56,11 +59,11 @@ var generateChunk = async (options, chunk) => {
       Switch,
       Route,
     } from 'react-router-dom';
-    import { NoMatch } from ${JSON.stringify(noMatchPath)};
+    import { NoMatch } from ${JSON.stringify(normalizePath(noMatchPath))};
   `);
   for (const page of chunk.pages) {
     const importPath = relativeImport(chunk.path, page.source);
-    lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(importPath)};`);
+    lines.push(`import { ${page.componentName} as ${page.importName} } from ${JSON.stringify(normalizePath(importPath))};`);
   }
   const getRouteCode = (page) => {
     return `
@@ -118,18 +121,18 @@ var generateIndex = async (options, indexPath, chunks) => {
       Route,
       Redirect,
     } from 'react-router-dom';
-    import { NoMatch } from ${JSON.stringify(noMatchPath)};
+    import { NoMatch } from ${JSON.stringify(normalizePath(noMatchPath))};
   `);
   for (const chunk of chunks) {
     if (!chunk.isLazy) {
       const importPath = relativeImport(indexPath, chunk.path);
-      lines.push(`import ${chunk.importName} from ${JSON.stringify(importPath)};`);
+      lines.push(`import ${chunk.importName} from ${JSON.stringify(normalizePath(importPath))};`);
     }
   }
   for (const chunk of chunks) {
     if (chunk.isLazy) {
       const importPath = relativeImport(indexPath, chunk.path);
-      lines.push(`const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(importPath)}))`);
+      lines.push(`const ${chunk.importName} = React.lazy(() => import(${JSON.stringify(normalizePath(importPath))}))`);
     }
   }
   lines.push("export default function SplitPagesIndex() {");
@@ -220,7 +223,7 @@ var build = async (options) => {
       return;
     }
     const ext = import_path5.default.extname(source);
-    const url = `/${import_path5.default.relative(options.pageRoot, source).replace(ext, "")}`;
+    const url = normalizePath(`/${import_path5.default.relative(options.pageRoot, source).replace(ext, "")}`);
     const importName = `${url.replace(/[/.]/g, "_")}`;
     if (/\.pagemeta\.tsx?$/.test(source)) {
       if (/index\.pagemeta\.tsx?$/.test(import_path5.default.basename(source))) {
@@ -270,11 +273,14 @@ var build = async (options) => {
   for (const [, chunk] of chunks) {
     await generateChunk(options, chunk);
   }
-  await generateIndex(options, import_path5.default.join(options.outDir, "index.tsx"), [...chunks.values()]);
+  await generateIndex(options, import_path5.default.join(options.outDir, "index.tsx"), [
+    ...chunks.values()
+  ]);
   await generateMeta(options, import_path5.default.join(options.outDir, "meta.ts"), pages);
 };
 
 // src/cli.ts
+var import_url = __toModule(require("url"));
 var main = () => {
   const finalArgv = process.argv[0] === "split-pages" ? ["node", ...process.argv] : process.argv;
   (0, import_yargs.default)((0, import_helpers.hideBin)(finalArgv)).command("build [config]", "build the pages. ", (y) => {
@@ -285,15 +291,13 @@ var main = () => {
       normalize: true
     });
   }, async (argv) => {
-    const {
-      config: configPath
-    } = argv;
+    const {config: configPath} = argv;
     let inputOptions;
     try {
       inputOptions = require(import_path6.default.resolve(process.cwd(), configPath));
     } catch (e) {
       if (e.code === "ERR_REQUIRE_ESM") {
-        inputOptions = (await import(import_path6.default.resolve(process.cwd(), configPath))).default;
+        inputOptions = (await import((0, import_url.pathToFileURL)(import_path6.default.resolve(process.cwd(), configPath)).toString())).default;
       } else {
         throw e;
       }
